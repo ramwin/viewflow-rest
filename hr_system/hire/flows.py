@@ -20,14 +20,14 @@ class HireFlow(flows.Flow):
     process_class = models.HireProcess
     task_class = models.HireTask
 
-    start = views.Start(
+    start = nodes.Start(
         viewclass=rest_extensions.AutoCreateAPIView,
         fields=["id", "name", "gender"],
     ).Next(
         this.end
     )
 
-    end = views.End()
+    end = nodes.End()
 
 
 log.info("引入hire.flows.py结束")

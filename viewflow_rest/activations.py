@@ -14,3 +14,4 @@ class StartActivation(Activation):
 
     def initializer(self, flow_task, task):
 
+        pass
