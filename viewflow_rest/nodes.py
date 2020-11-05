@@ -2,16 +2,31 @@
 # -*- coding: utf-8 -*-
 # Xiang Wang @ 2020-11-05 19:51:05
 
+import logging
+
+
+log = logging.getLogger(__name__)
+
 
 class Node(object):
 
-    def __init__(self, activation_class=None):
+    def __init__(self, activation_class=None, *args, **kwargs):
         self.activation_class = activation_class
         self._incoming_edges = []
         self._next = None
+        super().__init__(*args, **kwargs)
 
     def Next(self, node):
         self._next = node
+        return self
+
+    def ready(self):
+        log.info(f"我{self}准备好了")
+        pass
+
+    def urls(self):
+        return []
+
 
 class If(Node):
 
@@ -32,10 +47,10 @@ class If(Node):
         return self._condtion
 
 
-class Start(Node):
+class End(Node):
 
-    task_type = "START"
+    task_type = "END"
 
-    def __init__(self, view_or_class=None, **kwargs):
-        self._view = view_or_class
-        super().__init__(view_or_class, **kwargs)
+
+class Task(Node):
+    pass
