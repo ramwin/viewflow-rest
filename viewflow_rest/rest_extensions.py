@@ -12,6 +12,8 @@ import logging
 from rest_framework.generics import CreateAPIView
 from rest_framework import serializers
 
+from . import views
+
 
 log = logging.getLogger(__name__)
 
@@ -44,7 +46,7 @@ class AutoSerializerMixin(object):
         return self.get_auto_serializer_class()
 
 
-class AutoCreateAPIView(AutoSerializerMixin, CreateAPIView):
+class AutoCreateAPIView(views.StartViewMixin, AutoSerializerMixin, CreateAPIView):
     """
     start = flows.Start(
         AutoCreateAPIView(
@@ -53,4 +55,3 @@ class AutoCreateAPIView(AutoSerializerMixin, CreateAPIView):
         )
     )
     """
-    pass

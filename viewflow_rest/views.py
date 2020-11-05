@@ -6,54 +6,26 @@
 import logging
 from django.urls import path
 from django.views.generic.base import RedirectView
-from . import nodes, edges
+from . import nodes, edges, activations
 
 
 log = logging.getLogger(__name__)
 
 
-class ViewArgsMixin(object):
+class StartViewMixin(object):
 
-    def __init__(self, **kwargs):
-        self._view_args = kwargs
+    def activation_done(self, *args, **kwargs):
+        self.kwargs['flow_task'].done()
 
+    def perform_create(self, serializer):
+        super().perform_create(serializer)
+        self.request.activation.process = serializer.instance
 
-class Start(nodes.Node, ViewArgsMixin):
-
-    task_type = "START"
-
-    def __init__(self, viewclass=None, *args, **kwargs):
-        log.info("Start.init")
-        log.info(args)
-        log.info(kwargs)
-        self._view = viewclass
-        if viewclass is None:
-            raise Exception("不对")
-        super().__init__(viewclass, **kwargs)
-
-    def _outgoing(self):
-        if self._next:
-            return [
-                edges.Edge(src=self, dst=self._next, edge_class='next')
-            ]
-        return []
-
-    @property
-    def view(self):
-        log.info("根据参数生成view")
-        return self._view(**self._view_args)
-
-    def urls(self):
-        log.info("返回Start.urls")
-        urls = super().urls()
-        url = path('start/', self.view.as_view(), {'flow_task': self}, name="start")
-        urls.append(url)
-        return urls
-
-
-class End(nodes.Node):
-
-    task_type = "END"
-
-    def _outgoing(self):
-        return []
+    def dispatch(self, request, *args, **kwargs):
+        log.info("StartViewMixin.dispatch")
+        log.info(f"args: {args}")
+        log.info(f"kwargs: {kwargs}")
+        activation = activations.Activation()
+        # activation.
+        request.activation = activation
+        return super().dispatch(request, *args, **kwargs)
