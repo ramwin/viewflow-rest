@@ -4,15 +4,9 @@
 
 
 from django.db import models
-from django.db.models import TextChoices
 from . import fields
+from .edges import STATUS_CHOICE
 
-
-class STATUS_CHOICE(TextChoices):
-    NEW = "NEW", "创建了"
-    STARTED = "STARTED", "开始了"
-    DONE = "DONE", "结束了"
-    CANCELED = "CANCELED", "取消了"
 
 
 class AbstractProcess(models.Model):
@@ -33,6 +27,10 @@ class AbstractTask(models.Model):
     create_datetime = models.DateTimeField(auto_now_add=True)
     update_datetime = models.DateTimeField(auto_now=True)
     finished_datetime = models.DateTimeField(blank=True, null=True)
+
+    previous = models.ManyToManyField(
+        'self', symmetrical=False, related_name='leading',
+        verbose_name="上级任务")
 
     class Meta:
         abstract = True

@@ -8,7 +8,7 @@ import logging
 
 from django.urls import re_path, include
 
-from . import models, This
+from . import models, This, ThisObject
 from .nodes import Node
 
 
@@ -16,6 +16,23 @@ log = logging.getLogger(__name__)
 
 
 log.info("引入viewflow_rest.flows.py")
+
+
+class _Resolver(object):
+
+    def __init__(self, nodes):
+        self.nodes = nodes
+
+    def get_implementation(self, link):
+        if isinstance(link, Node):
+            node = link
+        elif isinstance(link, ThisObject):
+            node = self.nodes.get(link.name)
+        elif isinstance(link, str):
+            node = self.nodes.get(link)
+        if node:
+            return node
+        raise Exception(f"没有node{link}啊")
 
 
 class FlowMeta(object):
@@ -45,6 +62,10 @@ class FlowMetaClass(type):
         # 设定node的name
         for name, node in nodes.items():
             node.name = name
+
+        resolver = _Resolver(nodes)
+        for node in nodes.values():
+            node._resolve(resolver)
 
         # 设定node的_incoming_edges
         # key为outgoing的node

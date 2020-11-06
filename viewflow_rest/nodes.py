@@ -4,7 +4,7 @@
 
 import logging
 
-from . import edges
+from . import edges, activations
 from django.urls import path
 from django.views.generic.base import RedirectView
 
@@ -15,7 +15,6 @@ log = logging.getLogger(__name__)
 class Node(object):
 
     def __init__(self, activation_class=None, *args, **kwargs):
-        self.activation_class = activation_class
         self._incoming_edges = []
         self._next = None
         super().__init__(*args, **kwargs)
@@ -30,6 +29,10 @@ class Node(object):
 
     def urls(self):
         return []
+
+    def _resolve(self, resolver):
+        if self._next:
+            self._next = resolver.get_implementation(self._next)
 
 
 class If(Node):
@@ -69,6 +72,7 @@ class ViewArgsMixin(object):
 class Start(Node, ViewArgsMixin):
 
     task_type = "START"
+    activation_class = activations.StartActivation
 
     def __init__(self, viewclass=None, *args, **kwargs):
         log.info("Start.init")
@@ -100,6 +104,7 @@ class Start(Node, ViewArgsMixin):
 
 
 class End(Node):
+    activation_class = activations.EndActivation
 
     task_type = "END"
 

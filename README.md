@@ -5,7 +5,9 @@ provide restful viewflow
 
 0. Edge
 
-1. Node
+7. activations
+
+1. Nodes
 
 3. models
 
@@ -13,4 +15,6 @@ provide restful viewflow
 
 6. Flow
 
-7. rest_extensions
+
+9. rest_extensions
+
