@@ -9,7 +9,7 @@
 import logging
 
 
-from rest_framework.generics import CreateAPIView
+from rest_framework.generics import CreateAPIView, UpdateAPIView
 from rest_framework import serializers
 
 from . import views
@@ -52,6 +52,17 @@ class AutoCreateAPIView(views.StartViewMixin, AutoSerializerMixin, CreateAPIView
         AutoCreateAPIView(
             model=HireProcess,
             fields=["name"],
+        )
+    )
+    """
+
+
+class AutoUpdateAPIView(views.UpdateViewMixin, AutoSerializerMixin, UpdateAPIView):
+    """
+    approve = flows.View(
+        AutoUpdateAPIView(
+            model=HireProcess,
+            fields=["approved"],
         )
     )
     """

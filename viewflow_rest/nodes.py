@@ -34,6 +34,9 @@ class Node(object):
         if self._next:
             self._next = resolver.get_implementation(self._next)
 
+    def activate(self, prev_activation):
+        self.activation_class.activate(prev_activation)
+
 
 class If(Node):
 
@@ -69,7 +72,17 @@ class ViewArgsMixin(object):
         self._view_args = kwargs
 
 
-class Start(Node, ViewArgsMixin):
+class NextNodeMixin(object):
+
+    def _outgoing(self):
+        if self._next:
+            return [
+                edges.Edge(src=self, dst=self._next, edge_class='next')
+            ]
+        return []
+
+
+class Start(NextNodeMixin, Node, ViewArgsMixin):
 
     task_type = "START"
     activation_class = activations.StartActivation
@@ -82,13 +95,6 @@ class Start(Node, ViewArgsMixin):
         if viewclass is None:
             raise Exception("不对")
         super().__init__(viewclass, **kwargs)
-
-    def _outgoing(self):
-        if self._next:
-            return [
-                edges.Edge(src=self, dst=self._next, edge_class='next')
-            ]
-        return []
 
     @property
     def view(self):
@@ -110,3 +116,10 @@ class End(Node):
 
     def _outgoing(self):
         return []
+
+
+class View(NextNodeMixin, Node, ViewArgsMixin):
+
+    activation_class = activations.ViewActivation
+
+    task_type = "HUMAN"

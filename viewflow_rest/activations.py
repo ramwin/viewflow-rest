@@ -23,6 +23,18 @@ class Activation(object):
     def activate(cls, flow_task):
         log.info(f"我被激活了: {flow_task}")
 
+    def initialize(self, flow_task, task):
+        self.flow_task, self.flow_class = flow_task, flow_task.flow_class
+        self.process = self.flow_class.process_class._default_manager.get(
+            flow_class=self.flow_class,
+            pk=task.process_id)
+        self.task = task
+
+    def activate_next(self):
+        if self.flow_task._next:
+            self.flow_task._next.activate(
+                prev_activation=self)
+
 
 class StartActivation(Activation):
 
@@ -41,17 +53,8 @@ class StartActivation(Activation):
         self.task.save()
         self.activate_next()
 
-    def activate_next(self):
-        if self.flow_task._next:
-            self.flow_task._next.activate(
-                prev_activation=self)
-
 
 class EndActivation(Activation):
-
-    def initializer(self, flow_task, task):
-
-        pass
 
     def done(self):
         self.process.status = STATUS_CHOICE.DONE
@@ -75,3 +78,8 @@ class EndActivation(Activation):
         activation.initialize(flow_task, task)
         activation.done()
         return activation
+
+
+class ViewActivation(Activation):
+
+    pass

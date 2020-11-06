@@ -24,6 +24,13 @@ class HireFlow(flows.Flow):
         viewclass=rest_extensions.AutoCreateAPIView,
         fields=["id", "name", "gender"],
     ).Next(
+        this.approve
+    )
+
+    approve = nodes.View(
+        viewclass=rest_extensions.AutoUpdateAPIView,
+        fields=["approved"],
+    ).Next(
         this.end
     )
 
