@@ -37,6 +37,9 @@ class Node(object):
     def activate(self, prev_activation):
         self.activation_class.activate(self, prev_activation)
 
+    def _incoming(self):
+        return self._incoming_edges
+
 
 class If(Node):
 
@@ -157,3 +160,33 @@ class View(NextNodeMixin, Node, ViewArgsMixin):
     def view(self):
         return self._view(**self._view_args)
 
+
+class Split(Node, ViewArgsMixin):
+    task_type = "SPLIT"
+    activation_class = activations.SplitActivation
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self._activate_next = []
+
+    def _outgoing(self):
+        for next_node, cond in self._activate_next:
+            edge_class = "cond_true" if cond else "default"
+            yield edges.Edge(src=self, dst=next_node, edge_class=edge_class)
+
+    def _resolve(self, resolver):
+        self._activate_next = \
+            [(resolver.get_implementation(node), cond)
+                for node, cond in self._activate_next]
+
+    def Next(self, node, cond=None):
+        self._activate_next.append((node, cond))
+        return self
+
+    def Always(self, node):
+        return self.Next(node)
+
+
+class Join(NextNodeMixin, Node, ViewArgsMixin):
+    task_type = "JOIN"
+    activation_class = activations.JoinActivation

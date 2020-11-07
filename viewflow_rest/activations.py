@@ -44,7 +44,7 @@ class StartActivation(Activation):
     def initialize(self, flow_task):
         self.flow_task, self.flow_class = flow_task, flow_task.flow_class
         self.process = self.flow_class.process_class(flow_class=self.flow_class)
-        self.task = self.flow_class.task_class(flow_task=self.flow_task)
+        self.task = self.flow_class.task_class(flow_task=self.flow_task.name)
 
     def prepare(self):
         self.task.start_datetime = now()
@@ -81,7 +81,7 @@ class EndActivation(Activation):
         process = prev_activation.process
         task = flow_class.task_class(
             process=process,
-            flow_task=flow_task,
+            flow_task=flow_task.name,
         )
         task.save()
         task.previous.add(prev_activation.task)
@@ -98,7 +98,7 @@ class ViewActivation(Activation):
     def create_task(cls, flow_task, prev_activation):
         return flow_task.flow_class.task_class(
             process=prev_activation.process,
-            flow_task=flow_task,
+            flow_task=flow_task.name,
         )
 
     @classmethod
@@ -174,5 +174,113 @@ class IfActivation(Activation):
     def create_task(cls, flow_task, prev_activation):
         return flow_task.flow_class.task_class(
             process=prev_activation.process,
-            flow_task=flow_task,
+            flow_task=flow_task.name,
         )
+
+
+class SplitActivation(Activation):
+
+    def __init__(self, **kwargs):
+        self.next_tasks = []
+        super().__init__(**kwargs)
+
+    @classmethod
+    def activate(cls, flow_task, prev_activation):
+        flow_class, flow_task = flow_task.flow_class, flow_task
+        process = prev_activation.process
+
+        task = flow_class.task_class(
+            process=process,
+            flow_task=flow_task.name,
+        )
+        task.start_datetime = now()
+        task.save()
+        task.previous.add(prev_activation.task)
+
+        activation = cls()
+        activation.initialize(flow_task, task)
+        activation.perform()
+
+        return activation
+
+    def perform(self):
+        self.calculate_next()
+        self.task.finish_datetime = now()
+        self.task.status = STATUS_CHOICE.DONE
+        self.task.save()
+        self.activate_next()
+
+    def calculate_next(self):
+        for node, cond in self.flow_task._activate_next:
+            if cond:
+                if cond(self):
+                    self.next_tasks.append(node)
+            else:
+                self.next_tasks.append(node)
+        if not self.next_tasks:
+            raise Exception(f"No task to split for {self.flow_task.name}")
+
+    def activate_next(self):
+        for next_task in self.next_tasks:
+            next_task.activate(prev_activation=self)
+
+
+class JoinActivation(Activation):
+
+    def __init__(self, **kwargs):
+        self.next_task = None
+        super().__init__(**kwargs)
+
+    @classmethod
+    def activate(cls, flow_task, prev_activation):
+        flow_class, flow_task = flow_task.flow_class, flow_task
+        process = prev_activation.process
+        tasks = flow_class.task_class._default_manager.filter(
+            flow_task=flow_task.name,
+            process=process,
+            )
+        if tasks.count() > 1:
+            raise Exception(f"Too Many join task for flow_task: {flow_task.name}")
+        task = tasks.first()
+        if not task:
+            task_exist = False
+            task = flow_class.task_class(
+                process=process,
+                flow_task=flow_task.name,
+            )
+            task.status = STATUS_CHOICE.STARTED
+            task.start_datetime = now()
+            task.save()
+        else:
+            task_exist = True
+        task.previous.add(prev_activation.task)
+
+        activation = cls()
+        activation.initialize(flow_task, task)
+
+        if activation.is_done():
+            activation.done()
+        return activation
+
+    def is_done(self):
+        self.flow_class.task_class
+        for incoming_edge in self.flow_task._incoming():
+            try:
+                self.flow_class.task_class._default_manager.get(
+                    process=self.process,
+                    status=STATUS_CHOICE.DONE,
+                    flow_task=incoming_edge.src.name,
+                )
+            except self.flow_class.task_class.DoesNotExist:
+                return False
+        return True
+
+    def done(self):
+        self.task.finish_datetime = now()
+        self.task.status = STATUS_CHOICE.DONE
+        self.task.save()
+        self.activate_next()
+
+    def activate_next(self):
+        for outgoing in self.flow_task._outgoing():
+            outgoing.dst.activate(prev_activation=self)

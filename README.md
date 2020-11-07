@@ -8,13 +8,32 @@ Thanks you for all the [contributors of viewflow](https://github.com/viewflow/vi
 **The project is under GPL-3.0 License, any one who change the source code (even if you just use it in intranet of just at home) should upload his code**
 
 
+# workflow
+A flow contains many nodes  
+every node is a instance of Node
+every node have a `activation_class`  
+every `action_class` instance will `activate_next` by
+```
+self.flow_task._next  // the next node instance
+self.flow_task._next.activate // 
+```
+
 # 依赖顺序
 
-0. Edge
+## Edge
+* src: source Node instance
+* dst: target Node instance
 
-7. activations
+## activations
+* Attribute
+    * `flow_class`
+    * `flow_task`: Node Instance defined in the `flows.py`
+    * `task`: Current Task
 
-1. Nodes
+## Nodes
+* Function
+    * `_incoming`: Edge Instance list
+    * `_outgoing`: Edge Instance list
 
 3. models
 

@@ -18,6 +18,8 @@ class HireProcess(AbstractProcess):
         max_digits=9,
         decimal_places=2,
         null=True, blank=True)
+    notified = models.BooleanField("是否已经发送offer通知", blank=True, default=False)
+    background_ok = models.BooleanField("背景调查是否通过", blank=True, null=True)
 
     class Meta:
         verbose_name = verbose_name_plural = "招聘流程"
