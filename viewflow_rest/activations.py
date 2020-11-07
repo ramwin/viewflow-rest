@@ -64,6 +64,9 @@ class StartActivation(Activation):
             self.flow_task._next.activate(
                 prev_activation=self)
 
+    def has_perm(self, user):
+        return self.flow_task.can_execute(user)
+
 
 class EndActivation(Activation):
 
@@ -132,6 +135,9 @@ class ViewActivation(Activation):
         if self.flow_task._next:
             self.flow_task._next.activate(
                 prev_activation=self)
+
+    def has_perm(self, user):
+        return self.flow_task.can_execute(user, self.task)
 
 
 class IfActivation(Activation):

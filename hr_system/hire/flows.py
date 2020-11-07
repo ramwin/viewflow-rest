@@ -6,6 +6,7 @@
 import logging
 
 from viewflow_rest import flows, nodes, views, rest_extensions, this
+from django.contrib.auth.models import Group
 
 from . import models
 
@@ -23,6 +24,8 @@ class HireFlow(flows.Flow):
     start = nodes.Start(
         viewclass=rest_extensions.AutoCreateAPIView,
         fields=["id", "name", "gender"],
+    ).Permission(
+        group=Group.objects.get_or_create(name="hr")[0]
     ).Next(
         this.split_to_3rd_and_direct_leader
     )
@@ -63,6 +66,8 @@ class HireFlow(flows.Flow):
     approve = nodes.View(
         viewclass=rest_extensions.AutoUpdateAPIView,
         fields=["approved"],
+    ).Permission(
+        group=Group.objects.get_or_create(name="leader")[0]
     ).Next(
         this.check_if_approve
     )
@@ -78,6 +83,8 @@ class HireFlow(flows.Flow):
     set_salary = nodes.View(
         viewclass=rest_extensions.AutoUpdateAPIView,
         fields=["salary"],
+    ).Permission(
+        group=Group.objects.get_or_create(name="hr")[0]
     ).Next(
         this.join_on_both_approve
     )

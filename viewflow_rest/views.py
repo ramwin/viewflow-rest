@@ -8,6 +8,7 @@ from django.urls import path
 from django.views.generic.base import RedirectView
 from django.shortcuts import get_object_or_404
 
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 
 from . import nodes, edges, activations
@@ -30,6 +31,8 @@ class StartViewMixin(object):
         activation = flow_task.activation_class()
         self.activation = request.activation = activation
         activation.initialize(flow_task)
+        if not self.activation.has_perm(request.user):
+            raise PermissionDenied
         log.debug("StartViewMixin.dispatch")
         log.debug(f"kwargs: {kwargs}")
         return super().dispatch(request, **kwargs)
@@ -74,6 +77,8 @@ class UpdateViewMixin(object):
         activation = flow_task.activation_class()
         self.activation = request.activation = activation
         activation.initialize(flow_task, task)
+        if not activation.has_perm(request.user):
+            raise PermissionDenied
 
         return super().dispatch(request, **kwargs)
 

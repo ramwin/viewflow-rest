@@ -4,7 +4,7 @@
 
 import logging
 
-from . import edges, activations
+from . import edges, activations, mixins
 from django.urls import path, re_path
 from django.views.generic.base import RedirectView
 
@@ -98,7 +98,7 @@ class NextNodeMixin(object):
         return []
 
 
-class Start(NextNodeMixin, Node, ViewArgsMixin):
+class Start(mixins.PermissionMixin, NextNodeMixin, Node, ViewArgsMixin):
 
     task_type = "START"
     activation_class = activations.StartActivation
@@ -124,6 +124,10 @@ class Start(NextNodeMixin, Node, ViewArgsMixin):
         urls.append(url)
         return urls
 
+    def can_execute(self, user, task=None):
+        if self._owner_group:
+            return user in self._owner_group.user_set.all()
+
 
 class End(Node):
     activation_class = activations.EndActivation
@@ -134,7 +138,7 @@ class End(Node):
         return []
 
 
-class View(NextNodeMixin, Node, ViewArgsMixin):
+class View(mixins.PermissionMixin, NextNodeMixin, Node, ViewArgsMixin):
 
     activation_class = activations.ViewActivation
 
@@ -159,6 +163,10 @@ class View(NextNodeMixin, Node, ViewArgsMixin):
     @property
     def view(self):
         return self._view(**self._view_args)
+
+    def can_execute(self, user, task):
+        if self._owner_group:
+            return user in self._owner_group.user_set.all()
 
 
 class Split(Node, ViewArgsMixin):
