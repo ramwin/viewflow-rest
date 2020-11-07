@@ -31,6 +31,21 @@ class HireFlow(flows.Flow):
         viewclass=rest_extensions.AutoUpdateAPIView,
         fields=["approved"],
     ).Next(
+        this.check_if_approve
+    )
+
+    check_if_approve = nodes.If(
+        cond=lambda activation: activation.process.approved
+    ).Then(
+        this.set_salary
+    ).Else(
+        this.end
+    )
+
+    set_salary = nodes.View(
+        viewclass=rest_extensions.AutoUpdateAPIView,
+        fields=["salary"],
+    ).Next(
         this.end
     )
 

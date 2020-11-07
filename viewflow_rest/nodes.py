@@ -40,26 +40,39 @@ class Node(object):
 
 class If(Node):
 
-    def __init__(self, condition):
-        super().__init__(condition)
-        self._condtion = condition
+    task_type = "IF"
+    activation_class = activations.IfActivation
+
+    def __init__(self, cond, **kwargs):
+        super().__init__(**kwargs)
+        self._condtion = cond
         self._on_true = None
         self._on_false = None
 
     def Then(self, node):
         self._on_true = node
+        return self
 
     def Else(self, node):
         self._on_false = node
+        return self
 
     @property
     def condition(self):
         return self._condtion
 
+    def _outgoing(self):
+        return [
+            edges.Edge(src=self, dst=self._on_true, edge_class="cond_true"),
+            edges.Edge(src=self, dst=self._on_false, edge_class="cond_false"),
+        ]
 
-class End(Node):
+    def activate(self, prev_activation):
+        self.activation_class.activate(self, prev_activation)
 
-    task_type = "END"
+    def _resolve(self, resolver):
+        self._on_true = resolver.get_implementation(self._on_true)
+        self._on_false = resolver.get_implementation(self._on_false)
 
 
 class Task(Node):
@@ -143,3 +156,4 @@ class View(NextNodeMixin, Node, ViewArgsMixin):
     @property
     def view(self):
         return self._view(**self._view_args)
+

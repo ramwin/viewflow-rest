@@ -7,9 +7,9 @@ from . import models
 
 @admin.register(models.HireProcess)
 class HireProcessAdmin(admin.ModelAdmin):
-    pass
+    list_display = ["id", "approved", "status", "create_datetime", "finish_datetime"]
 
 
 @admin.register(models.HireTask)
 class HireTask(admin.ModelAdmin):
-    pass
+    list_display = ["id", "flow_task", "status", "create_datetime", "finish_datetime"]

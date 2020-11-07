@@ -54,7 +54,9 @@ class UpdateViewMixin(object):
         self.activation.done()
 
     def perform_update(self, serializer):
+        log.info("数据更新开始")
         super().perform_update(serializer)
+        log.info("数据更新完毕")
         self.activation_done()
 
     def dispatch(self, request, **kwargs):
