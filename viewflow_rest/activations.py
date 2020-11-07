@@ -26,7 +26,7 @@ class Activation(object):
         pass
 
     def initialize(self, flow_task, task):
-        log.info("初始化activation")
+        log.debug("初始化activation")
         self.flow_task, self.flow_class = flow_task, flow_task.flow_class
         self.process = self.flow_class.process_class._default_manager.get(
             flow_class=self.flow_class,
@@ -55,9 +55,9 @@ class StartActivation(Activation):
         self.task.finish_datetime = now()
         self.task.status = STATUS_CHOICE.DONE
         self.task.save()
-        log.info("StartActivation结束了")
+        log.debug("StartActivation结束了")
         self.activate_next()
-        log.info("下一个步骤激活了")
+        log.debug("下一个步骤激活了")
 
     def activate_next(self):
         if self.flow_task._next:
@@ -120,7 +120,7 @@ class ViewActivation(Activation):
         return activation
 
     def done(self):
-        log.info("ViewActivation结束")
+        log.debug("ViewActivation结束")
         self.task.finish_datetime = now()
         self.task.status = STATUS_CHOICE.DONE
         self.task.save()
@@ -128,7 +128,7 @@ class ViewActivation(Activation):
         self.activate_next()
 
     def activate_next(self):
-        log.info("ViewActivation激活下一个")
+        log.debug("ViewActivation激活下一个")
         if self.flow_task._next:
             self.flow_task._next.activate(
                 prev_activation=self)

@@ -30,8 +30,8 @@ class StartViewMixin(object):
         activation = flow_task.activation_class()
         self.activation = request.activation = activation
         activation.initialize(flow_task)
-        log.info("StartViewMixin.dispatch")
-        log.info(f"kwargs: {kwargs}")
+        log.debug("StartViewMixin.dispatch")
+        log.debug(f"kwargs: {kwargs}")
         return super().dispatch(request, **kwargs)
 
     def post(self, request, *args, **kwargs):
@@ -54,9 +54,9 @@ class UpdateViewMixin(object):
         self.activation.done()
 
     def perform_update(self, serializer):
-        log.info("数据更新开始")
+        log.debug("数据更新开始")
         super().perform_update(serializer)
-        log.info("数据更新完毕")
+        log.debug("数据更新完毕")
         self.activation_done()
 
     def dispatch(self, request, **kwargs):

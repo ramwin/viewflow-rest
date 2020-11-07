@@ -24,7 +24,7 @@ class Node(object):
         return self
 
     def ready(self):
-        log.info(f"我{self}准备好了")
+        log.debug(f"我{self}准备好了")
         pass
 
     def urls(self):
@@ -104,9 +104,9 @@ class Start(NextNodeMixin, Node, ViewArgsMixin):
     activation_class = activations.StartActivation
 
     def __init__(self, viewclass=None, *args, **kwargs):
-        log.info("Start.init")
-        log.info(args)
-        log.info(kwargs)
+        log.debug("Start.init")
+        log.debug(args)
+        log.debug(kwargs)
         self._view = viewclass
         if viewclass is None:
             raise Exception("不对")
@@ -114,11 +114,11 @@ class Start(NextNodeMixin, Node, ViewArgsMixin):
 
     @property
     def view(self):
-        log.info("根据参数生成view")
+        log.debug("根据参数生成view")
         return self._view(**self._view_args)
 
     def urls(self):
-        log.info("返回Start.urls")
+        log.debug("返回Start.urls")
         urls = super().urls()
         url = path('start/', self.view.as_view(), {'flow_task': self}, name="start")
         urls.append(url)
@@ -141,7 +141,7 @@ class View(NextNodeMixin, Node, ViewArgsMixin):
     task_type = "HUMAN"
 
     def __init__(self, viewclass=None, *args, **kwargs):
-        log.info("初始化View")
+        log.debug("初始化View")
         self._view = viewclass
         super().__init__(viewclass, **kwargs)
 
@@ -153,7 +153,7 @@ class View(NextNodeMixin, Node, ViewArgsMixin):
                 self.view.as_view(), {'flow_task': self}, name=self.name
             )
         )
-        log.info(f"返回View.urls: {urls}")
+        log.debug(f"返回View.urls: {urls}")
         return urls
 
     @property

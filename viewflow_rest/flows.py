@@ -15,7 +15,7 @@ from .nodes import Node
 log = logging.getLogger(__name__)
 
 
-log.info("引入viewflow_rest.flows.py")
+log.debug("引入viewflow_rest.flows.py")
 
 
 class _Resolver(object):
@@ -48,8 +48,8 @@ class FlowMeta(object):
 class FlowMetaClass(type):
 
     def __new__(cls, class_name, bases, attrs, **kwargs): 
-        log.info("创建一个新的Flow类")
-        log.info(attrs)
+        log.debug("创建一个新的Flow类")
+        log.debug(attrs)
         new_class = super(FlowMetaClass, cls).__new__(
             cls, class_name, bases, attrs)
 
@@ -93,7 +93,7 @@ class FlowMetaClass(type):
         return new_class
 
 
-log.info("初始化Flow")
+log.debug("初始化Flow")
 
 
 class Flow(metaclass=FlowMetaClass):
@@ -104,20 +104,20 @@ class Flow(metaclass=FlowMetaClass):
 
     @property
     def urls(self):
-        log.info("载入Flow.urls")
+        log.debug("载入Flow.urls")
         node_urls = []
         for node in self._meta.nodes():
             node_urls += node.urls()
         result = node_urls
-        log.info("载入Flow.urls完毕")
-        log.info(result)
+        log.debug("载入Flow.urls完毕")
+        log.debug(result)
         return result
 
     def __str__(self):
         return str(self.process_title)
 
 
-log.info("引入viewflow_rest.flows.py结束")
+log.debug("引入viewflow_rest.flows.py结束")
 
 
 this = This()
