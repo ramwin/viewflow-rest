@@ -38,7 +38,7 @@ class Activation(object):
 
 class StartActivation(Activation):
 
-    def initializer(self, flow_task):
+    def initialize(self, flow_task):
         self.flow_task, self.flow_class = flow_task, flow_task.flow_class
         self.process = self.flow_class.process_class(flow_class=self.flow_class)
         self.task = self.flow_class.task_class(flow_task=self.flow_task)
@@ -49,7 +49,8 @@ class StartActivation(Activation):
     def done(self):
         self.process.save()
         self.task.process = self.process
-        self.task.finished = now()
+        self.task.finish_datetime = now()
+        self.task.status = STATUS_CHOICE.DONE
         self.task.save()
         self.activate_next()
 
@@ -58,9 +59,10 @@ class EndActivation(Activation):
 
     def done(self):
         self.process.status = STATUS_CHOICE.DONE
-        self.process.finished_datetime = now()
+        self.process.finish_datetime = now()
         self.process.save()
-        self.task.finished_datetime = now()
+        self.task.finish_datetime = now()
+        self.task.status = STATUS_CHOICE.DONE
         self.task.save()
 
     @classmethod
@@ -82,4 +84,29 @@ class EndActivation(Activation):
 
 class ViewActivation(Activation):
 
-    pass
+    @classmethod
+    def create_task(cls, flow_task, prev_activation):
+        return flow_task.flow_class.task_class(
+            process=prev_activation.process,
+            flow_task=flow_task,
+        )
+
+    @classmethod
+    def activate(cls, flow_task, prev_activation):
+        task = cls.create_task(flow_task, prev_activation)
+
+        task.status = STATUS_CHOICE.STARTED
+        task.save()
+        task.previous.add(prev_activation.task)
+
+        activation = cls()
+        activation.initialize(flow_task, task)
+
+        return activation
+
+    def done(self):
+        self.task.finish_datetime = now()
+        self.task.status = STATUS_CHOICE.DONE
+        self.task.save()
+
+        self.activate_next()

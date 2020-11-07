@@ -5,7 +5,7 @@
 import logging
 
 from . import edges, activations
-from django.urls import path
+from django.urls import path, re_path
 from django.views.generic.base import RedirectView
 
 
@@ -35,7 +35,7 @@ class Node(object):
             self._next = resolver.get_implementation(self._next)
 
     def activate(self, prev_activation):
-        self.activation_class.activate(prev_activation)
+        self.activation_class.activate(self, prev_activation)
 
 
 class If(Node):
@@ -123,3 +123,23 @@ class View(NextNodeMixin, Node, ViewArgsMixin):
     activation_class = activations.ViewActivation
 
     task_type = "HUMAN"
+
+    def __init__(self, viewclass=None, *args, **kwargs):
+        log.info("初始化View")
+        self._view = viewclass
+        super().__init__(viewclass, **kwargs)
+
+    def urls(self):
+        urls = super().urls()
+        urls.append(
+            path(
+                f"<int:process_id>/{self.name}/<int:task_id>/",
+                self.view.as_view(), {'flow_task': self}, name=self.name
+            )
+        )
+        log.info(f"返回View.urls: {urls}")
+        return urls
+
+    @property
+    def view(self):
+        return self._view(**self._view_args)

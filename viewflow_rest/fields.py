@@ -16,11 +16,11 @@ def import_flow_by_ref(flow_strref):
     return app_config.module.__name__
 
 
-class FlowReferenceField(models.CharField):
+class FlowReferenceField(models.TextField):
 
     pass
 
 
-class TaskReferenceField(models.CharField):
+class TaskReferenceField(models.TextField):
 
     pass

@@ -10,23 +10,26 @@ from .edges import STATUS_CHOICE
 
 
 class AbstractProcess(models.Model):
-    flow_class = fields.FlowReferenceField('Flow', max_length=63)
+    flow_class = fields.FlowReferenceField('Flow')
     status = models.CharField("状态", choices=STATUS_CHOICE.choices, max_length=15)
     create_datetime = models.DateTimeField(auto_now_add=True)
     update_datetime = models.DateTimeField(auto_now=True)
-    finished_datetime = models.DateTimeField(blank=True, null=True)
+    finish_datetime = models.DateTimeField(blank=True, null=True)
 
     class Meta:
         abstract = True
 
 
 class AbstractTask(models.Model):
-    flow_task = fields.TaskReferenceField('Task', max_length=63)
+    """
+    A task should not be assigned, if you need to assign a task, you can add a node which do the thing
+    """
+    flow_task = fields.TaskReferenceField('Task')
     flow_task_type = models.CharField("类型", max_length=31)
     status = models.CharField("状态", choices=STATUS_CHOICE.choices, max_length=15)
     create_datetime = models.DateTimeField(auto_now_add=True)
     update_datetime = models.DateTimeField(auto_now=True)
-    finished_datetime = models.DateTimeField(blank=True, null=True)
+    finish_datetime = models.DateTimeField(blank=True, null=True)
 
     previous = models.ManyToManyField(
         'self', symmetrical=False, related_name='leading',

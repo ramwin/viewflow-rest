@@ -6,6 +6,7 @@
 import logging
 from django.urls import path
 from django.views.generic.base import RedirectView
+from django.shortcuts import get_object_or_404
 
 from rest_framework.response import Response
 
@@ -28,7 +29,7 @@ class StartViewMixin(object):
         flow_task = kwargs["flow_task"]
         activation = flow_task.activation_class()
         self.activation = request.activation = activation
-        activation.initializer(flow_task)
+        activation.initialize(flow_task)
         log.info("StartViewMixin.dispatch")
         log.info(f"kwargs: {kwargs}")
         return super().dispatch(request, **kwargs)
@@ -58,11 +59,16 @@ class UpdateViewMixin(object):
 
     def dispatch(self, request, **kwargs):
         flow_task = kwargs["flow_task"]
+        task_pk = kwargs["task_id"]
+        process_pk = kwargs["process_id"]
+
+        task = get_object_or_404(
+            flow_task.flow_class.task_class._default_manager, pk=task_pk, process_id=process_pk)
+
         activation = flow_task.activation_class()
         self.activation = request.activation = activation
-        activation.initializer(flow_task)
-        log.info("StartViewMixin.dispatch")
-        log.info(f"kwargs: {kwargs}")
+        activation.initialize(flow_task, task)
+
         return super().dispatch(request, **kwargs)
 
     def post(self, request, *args, **kwargs):
@@ -72,8 +78,6 @@ class UpdateViewMixin(object):
             data=request.data,
         )
         serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        return Response(
-            serializer.data, status=201,
-            headers=headers)
+        self.perform_update(serializer)
+        # headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=200)
