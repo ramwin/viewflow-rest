@@ -72,7 +72,7 @@ class HireFlow(flows.Flow):
     ).Then(
         this.set_salary
     ).Else(
-        this.end
+        this.notify
     )
 
     set_salary = nodes.View(

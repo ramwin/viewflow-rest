@@ -65,7 +65,11 @@ class UpdateViewMixin(object):
         process_pk = kwargs["process_id"]
 
         task = get_object_or_404(
-            flow_task.flow_class.task_class._default_manager, pk=task_pk, process_id=process_pk)
+            flow_task.flow_class.task_class._default_manager,
+            pk=task_pk,
+            flow_task=flow_task.name,
+            process_id=process_pk,
+        )
 
         activation = flow_task.activation_class()
         self.activation = request.activation = activation

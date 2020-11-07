@@ -21,4 +21,8 @@ log.info("执行完毕")
 log.info(f"urls: {urls}")
 
 
-urlpatterns = urls
+app_name = "hire"
+
+urlpatterns = [
+    path("hireflow/", include((urls, "hireflow"), namespace="hireflow")),
+]
