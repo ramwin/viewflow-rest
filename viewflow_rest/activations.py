@@ -82,7 +82,7 @@ class EndActivation(Activation):
     def activate(cls, flow_task, prev_activation):
         flow_class, flow_task = flow_task.flow_class, flow_task
         process = prev_activation.process
-        task = flow_class.task_class(
+        task, _ = flow_class.task_class.objects.get_or_create(
             process=process,
             flow_task=flow_task.name,
         )
@@ -99,10 +99,10 @@ class ViewActivation(Activation):
 
     @classmethod
     def create_task(cls, flow_task, prev_activation):
-        return flow_task.flow_class.task_class(
+        return flow_task.flow_class.task_class.objects.get_or_create(
             process=prev_activation.process,
             flow_task=flow_task.name,
-        )
+        )[0]
 
     @classmethod
     def activate(cls, flow_task, prev_activation):
@@ -178,10 +178,10 @@ class IfActivation(Activation):
 
     @classmethod
     def create_task(cls, flow_task, prev_activation):
-        return flow_task.flow_class.task_class(
+        return flow_task.flow_class.task_class.objects.get_or_create(
             process=prev_activation.process,
             flow_task=flow_task.name,
-        )
+        )[0]
 
 
 class SplitActivation(Activation):
@@ -195,10 +195,10 @@ class SplitActivation(Activation):
         flow_class, flow_task = flow_task.flow_class, flow_task
         process = prev_activation.process
 
-        task = flow_class.task_class(
+        task = flow_class.task_class.objects.get_or_create(
             process=process,
             flow_task=flow_task.name,
-        )
+        )[0]
         task.start_datetime = now()
         task.save()
         task.previous.add(prev_activation.task)
@@ -244,21 +244,21 @@ class JoinActivation(Activation):
         tasks = flow_class.task_class._default_manager.filter(
             flow_task=flow_task.name,
             process=process,
-            )
+        )
         if tasks.count() > 1:
             raise Exception(f"Too Many join task for flow_task: {flow_task.name}")
         task = tasks.first()
         if not task:
-            task_exist = False
-            task = flow_class.task_class(
+            # task_exist = False
+            task, _ = flow_class.task_class.objects.get_or_create(
                 process=process,
                 flow_task=flow_task.name,
             )
             task.status = STATUS_CHOICE.STARTED
             task.start_datetime = now()
             task.save()
-        else:
-            task_exist = True
+        # else:
+            # task_exist = True
         task.previous.add(prev_activation.task)
 
         activation = cls()
