@@ -20,6 +20,10 @@ Thanks you for all the [contributors of viewflow](https://github.com/viewflow/vi
 6. [Create Split Node](https://www.bilibili.com/video/BV1sp4y1678D/)
 7. [Create Join Node](https://www.bilibili.com/video/BV15i4y1L7ao/)
 8. [Create Permission](https://www.bilibili.com/video/BV1vD4y197Dr/)
+9. [0.3.0](https://www.bilibili.com/video/BV1Av411r73n/)
+    * one task for every `flow_task`
+    * add `serializer_class` parameters for `rest_extentions.views`
+    * add `operator` for every task
 
 
 # workflow
