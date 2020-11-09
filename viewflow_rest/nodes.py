@@ -153,7 +153,7 @@ class View(mixins.PermissionMixin, NextNodeMixin, Node, ViewArgsMixin):
         urls = super().urls()
         urls.append(
             path(
-                f"<int:process_id>/{self.name}/<int:task_id>/",
+                f"<slug:process_id>/{self.name}/<slug:task_id>/",
                 self.view.as_view(), {'flow_task': self}, name=self.name
             )
         )
