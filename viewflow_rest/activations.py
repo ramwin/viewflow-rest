@@ -49,11 +49,12 @@ class StartActivation(Activation):
     def prepare(self):
         self.task.start_datetime = now()
 
-    def done(self):
+    def done(self, operator=None):
         self.process.save()
         self.task.process = self.process
         self.task.finish_datetime = now()
         self.task.status = STATUS_CHOICE.DONE
+        self.task.operator = operator
         self.task.save()
         log.debug("StartActivation结束了")
         self.activate_next()
@@ -122,10 +123,11 @@ class ViewActivation(Activation):
 
         return activation
 
-    def done(self):
+    def done(self, operator=None):
         log.debug("ViewActivation结束")
         self.task.finish_datetime = now()
         self.task.status = STATUS_CHOICE.DONE
+        self.task.operator = operator
         self.task.save()
 
         self.activate_next()

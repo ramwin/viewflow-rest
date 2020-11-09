@@ -20,7 +20,7 @@ log = logging.getLogger(__name__)
 class StartViewMixin(object):
 
     def activation_done(self, *args, **kwargs):
-        self.activation.done()
+        self.activation.done(operator=self.request.user)
 
     def perform_create(self, serializer):
         super().perform_create(serializer)
@@ -54,7 +54,7 @@ class StartViewMixin(object):
 class UpdateViewMixin(object):
 
     def activation_done(self, *args, **kwargs):
-        self.activation.done()
+        self.activation.done(operator=self.request.user)
 
     def perform_update(self, serializer):
         log.debug("数据更新开始")

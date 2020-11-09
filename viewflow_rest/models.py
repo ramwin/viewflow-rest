@@ -4,6 +4,8 @@
 
 
 from django.db import models
+from django.contrib.auth import get_user_model
+from django.conf import settings
 from . import fields
 from .edges import STATUS_CHOICE
 
@@ -30,6 +32,8 @@ class AbstractTask(models.Model):
     create_datetime = models.DateTimeField(auto_now_add=True)
     update_datetime = models.DateTimeField(auto_now=True)
     finish_datetime = models.DateTimeField(blank=True, null=True)
+    operator = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL)
 
     previous = models.ManyToManyField(
         'self', symmetrical=False, related_name='leading',
