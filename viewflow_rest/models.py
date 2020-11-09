@@ -13,7 +13,7 @@ from .edges import STATUS_CHOICE
 
 class AbstractProcess(models.Model):
     flow_class = fields.FlowReferenceField('Flow')
-    status = models.CharField("状态", choices=STATUS_CHOICE.choices, max_length=15)
+    status = models.CharField("状态", choices=STATUS_CHOICE.choices, max_length=15, default=STATUS_CHOICE.STARTED)
     create_datetime = models.DateTimeField(auto_now_add=True)
     update_datetime = models.DateTimeField(auto_now=True)
     finish_datetime = models.DateTimeField(blank=True, null=True)

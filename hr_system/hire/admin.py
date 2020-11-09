@@ -12,4 +12,4 @@ class HireProcessAdmin(admin.ModelAdmin):
 
 @admin.register(models.HireTask)
 class HireTask(admin.ModelAdmin):
-    list_display = ["id", "flow_task", "flow_task_type", "status", "create_datetime", "finish_datetime"]
+    list_display = ["id", "flow_task", "flow_task_type", "status", "create_datetime", "finish_datetime", "operator"]
