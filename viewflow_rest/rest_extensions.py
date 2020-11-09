@@ -43,6 +43,10 @@ class AutoSerializerMixin(object):
         return create_serializer(model, fields)
 
     def get_serializer_class(self):
+        task = self.kwargs["flow_task"]
+        serializer_class = task._view_args.get("serializer_class", None)
+        if serializer_class is not None:
+            return serializer_class
         return self.get_auto_serializer_class()
 
 
