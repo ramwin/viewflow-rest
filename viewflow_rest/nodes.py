@@ -40,6 +40,9 @@ class Node(object):
     def _incoming(self):
         return self._incoming_edges
 
+    def can_execute(self, user, task=None):
+        return True
+
 
 class If(Node):
 
@@ -127,6 +130,7 @@ class Start(mixins.PermissionMixin, NextNodeMixin, Node, ViewArgsMixin):
     def can_execute(self, user, task=None):
         if self._owner_group:
             return user in self._owner_group.user_set.all()
+        return True
 
 
 class End(Node):
@@ -167,6 +171,7 @@ class View(mixins.PermissionMixin, NextNodeMixin, Node, ViewArgsMixin):
     def can_execute(self, user, task):
         if self._owner_group:
             return user in self._owner_group.user_set.all()
+        return True
 
 
 class Split(Node, ViewArgsMixin):
