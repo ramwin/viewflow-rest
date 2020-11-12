@@ -3,12 +3,14 @@
 # Xiang Wang @ 2020-11-05 21:17:16
 
 
+import importlib
+import re
+
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.conf import settings
 from . import fields
 from .edges import STATUS_CHOICE
-
 
 
 class AbstractProcess(models.Model):
@@ -20,6 +22,15 @@ class AbstractProcess(models.Model):
 
     class Meta:
         abstract = True
+
+    def get_flow_class(self):
+        if hasattr(self, "_flow_class"):
+            return self._flow_class
+        module, class_name = re.match(r"^(.*)\.(\w*)$", self.flow_class).groups()
+        module = importlib.import_module(module)
+        flow_class = getattr(module, class_name)
+        self._flow_class = flow_class
+        return flow_class
 
 
 class AbstractTask(models.Model):
@@ -41,3 +52,7 @@ class AbstractTask(models.Model):
 
     class Meta:
         abstract = True
+
+    def get_flow_task(self):
+        flow_class = self.process.get_flow_class()
+        return flow_class._meta._nodes_by_name[self.flow_task]

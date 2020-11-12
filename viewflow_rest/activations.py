@@ -29,7 +29,10 @@ class Activation(object):
         log.debug("初始化activation")
         self.flow_task, self.flow_class = flow_task, flow_task.flow_class
         self.process = self.flow_class.process_class._default_manager.get(
-            flow_class=self.flow_class,
+            flow_class=".".join([
+                self.flow_class.__module__,
+                self.flow_class.__name__
+            ]),
             pk=task.process_id)
         self.task = task
 
@@ -43,7 +46,12 @@ class StartActivation(Activation):
 
     def initialize(self, flow_task):
         self.flow_task, self.flow_class = flow_task, flow_task.flow_class
-        self.process = self.flow_class.process_class(flow_class=self.flow_class)
+        self.process = self.flow_class.process_class(
+            flow_class=".".join([
+                self.flow_class.__module__,
+                self.flow_class.__name__,
+            ])
+        )
         self.task = self.flow_class.task_class(
             flow_task=self.flow_task.name,
             flow_task_type=self.flow_task.task_type,
