@@ -44,7 +44,10 @@ class StartActivation(Activation):
     def initialize(self, flow_task):
         self.flow_task, self.flow_class = flow_task, flow_task.flow_class
         self.process = self.flow_class.process_class(flow_class=self.flow_class)
-        self.task = self.flow_class.task_class(flow_task=self.flow_task.name)
+        self.task = self.flow_class.task_class(
+            flow_task=self.flow_task.name,
+            flow_task_type=self.flow_task.task_type,
+        )
 
     def prepare(self):
         self.task.start_datetime = now()
@@ -87,6 +90,7 @@ class EndActivation(Activation):
             process=process,
             flow_task=flow_task.name,
         )
+        task.flow_task_type = flow_task.task_type
         task.save()
         task.previous.add(prev_activation.task)
 
@@ -100,10 +104,13 @@ class ViewActivation(Activation):
 
     @classmethod
     def create_task(cls, flow_task, prev_activation):
-        return flow_task.flow_class.task_class.objects.get_or_create(
+        task = flow_task.flow_class.task_class.objects.get_or_create(
             process=prev_activation.process,
             flow_task=flow_task.name,
         )[0]
+        task.flow_task_type = flow_task.task_type
+        task.save()
+        return task
 
     @classmethod
     def activate(cls, flow_task, prev_activation):
@@ -180,10 +187,13 @@ class IfActivation(Activation):
 
     @classmethod
     def create_task(cls, flow_task, prev_activation):
-        return flow_task.flow_class.task_class.objects.get_or_create(
+        task = flow_task.flow_class.task_class.objects.get_or_create(
             process=prev_activation.process,
             flow_task=flow_task.name,
         )[0]
+        task.flow_task_type = flow_task.task_type
+        task.save()
+        return task
 
 
 class SplitActivation(Activation):
@@ -201,6 +211,7 @@ class SplitActivation(Activation):
             process=process,
             flow_task=flow_task.name,
         )[0]
+        task.flow_task_type = flow_task.task_type
         task.start_datetime = now()
         task.save()
         task.previous.add(prev_activation.task)
@@ -257,6 +268,7 @@ class JoinActivation(Activation):
                 flow_task=flow_task.name,
             )
             task.status = STATUS_CHOICE.STARTED
+            task.flow_task_type = flow_task.task_type
             task.start_datetime = now()
             task.save()
         # else:
