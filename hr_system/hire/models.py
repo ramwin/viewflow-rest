@@ -24,6 +24,9 @@ class HireProcess(AbstractProcess):
     class Meta:
         verbose_name = verbose_name_plural = "招聘流程"
 
+    def __str__(self):
+        return "SingleHireProcess {}, id: {}".format(self.name, self.id)
+
 
 class HireTask(AbstractTask):
     process = models.ForeignKey(
@@ -31,3 +34,6 @@ class HireTask(AbstractTask):
 
     class Meta:
         verbose_name = verbose_name_plural = "招聘任务"
+
+    def __str__(self):
+        return "SingleHireTask {}, id: {}".format(self.flow_task, self.id)
