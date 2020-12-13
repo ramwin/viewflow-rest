@@ -4,6 +4,7 @@
 
 from django.utils.timezone import now
 from .edges import STATUS_CHOICE
+from . import signals
 import logging
 
 
@@ -62,12 +63,18 @@ class StartActivation(Activation):
 
     def done(self, operator=None):
         self.process.save()
+        signals.task_started.send(
+            sender=self.flow_class, process=self.process, task=self.task)
         self.task.process = self.process
         self.task.finish_datetime = now()
         self.task.status = STATUS_CHOICE.DONE
         self.task.operator = operator
         self.task.save()
+        signals.task_finished.send(
+            sender=self.flow_class, process=self.process, task=self.task)
         log.debug("StartActivation结束了")
+        signals.flow_started.send(
+            sender=self.flow_class, process=self.process, task=self.task)
         self.activate_next()
         log.debug("下一个步骤激活了")
 
@@ -83,12 +90,18 @@ class StartActivation(Activation):
 class EndActivation(Activation):
 
     def done(self):
+        signals.task_started.send(
+            sender=self.flow_class, process=self.process, task=self.task)
         self.process.status = STATUS_CHOICE.DONE
         self.process.finish_datetime = now()
         self.process.save()
         self.task.finish_datetime = now()
         self.task.status = STATUS_CHOICE.DONE
         self.task.save()
+        signals.task_finished.send(
+            sender=self.flow_class, process=self.process, task=self.task)
+        signals.flow_finished.send(
+            sender=self.flow_class, process=self.process, task=self.task)
 
     @classmethod
     def activate(cls, flow_task, prev_activation):
@@ -135,6 +148,8 @@ class ViewActivation(Activation):
 
         activation = cls()
         activation.initialize(flow_task, task)
+        signals.task_started.send(
+            sender=activation.flow_class, process=activation.process, task=activation.task)
 
         return activation
 
@@ -144,6 +159,9 @@ class ViewActivation(Activation):
         self.task.status = STATUS_CHOICE.DONE
         self.task.operator = operator
         self.task.save()
+
+        signals.task_finished.send(
+            sender=self.flow_class, process=self.process, task=self.task)
 
         self.activate_next()
 
@@ -175,11 +193,14 @@ class IfActivation(Activation):
         self.task.start_datetime = now()
         self.task.save()
 
+        signals.task_started.send(sender=self.flow_class, process=self.process, task=self.task)
+
         self.calculate_next()
 
         self.task.finish_datetime = now()
         self.task.status = STATUS_CHOICE.DONE
         self.task.save()
+        signals.task_finished.send(sender=self.flow_class, process=self.process, task=self.task)
         self.activate_next()
 
     @classmethod
@@ -231,10 +252,12 @@ class SplitActivation(Activation):
         return activation
 
     def perform(self):
+        signals.task_started.send(sender=self.flow_class, process=self.process, task=self.task)
         self.calculate_next()
         self.task.finish_datetime = now()
         self.task.status = STATUS_CHOICE.DONE
         self.task.save()
+        signals.task_finished.send(sender=self.flow_class, process=self.process, task=self.task)
         self.activate_next()
 
     def calculate_next(self):
@@ -270,7 +293,7 @@ class JoinActivation(Activation):
             raise Exception(f"Too Many join task for flow_task: {flow_task.name}")
         task = tasks.first()
         if not task:
-            # task_exist = False
+            task_exist = False
             task, _ = flow_class.task_class.objects.get_or_create(
                 process=process,
                 flow_task=flow_task.name,
@@ -279,12 +302,15 @@ class JoinActivation(Activation):
             task.flow_task_type = flow_task.task_type
             task.start_datetime = now()
             task.save()
-        # else:
-            # task_exist = True
+        else:
+            task_exist = True
         task.previous.add(prev_activation.task)
 
         activation = cls()
         activation.initialize(flow_task, task)
+        if task_exist is False:
+            signals.task_started.send(
+                sender=activation.flow_class, process=activation.process, task=activation.task)
 
         if activation.is_done():
             activation.done()
@@ -307,6 +333,7 @@ class JoinActivation(Activation):
         self.task.finish_datetime = now()
         self.task.status = STATUS_CHOICE.DONE
         self.task.save()
+        signals.task_finished.send(sender=self.flow_class, process=self.process, task=self.task)
         self.activate_next()
 
     def activate_next(self):

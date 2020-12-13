@@ -7,6 +7,7 @@ import logging
 
 from viewflow_rest import flows, nodes, views, rest_extensions, this
 from django.contrib.auth.models import Group
+from viewflow_rest import signals
 
 from . import models, serializers
 
@@ -95,3 +96,25 @@ class HireFlow(flows.Flow):
 
 log.info("引入hire.flows.py结束")
 log.info(HireFlow._meta.nodes())
+
+
+def task_started(**kwargs):
+    log.info("任务开始了")
+    log.info(kwargs["task"])
+
+def task_finished(**kwargs):
+    log.info("任务结束了")
+    log.info(kwargs["task"])
+
+def flow_started(**kwargs):
+    log.info("流程开始了")
+    log.info(kwargs)
+
+def flow_finished(**kwargs):
+    log.info("流程结束了")
+
+
+signals.task_finished.connect(task_finished)
+signals.task_started.connect(task_started)
+signals.flow_started.connect(flow_started)
+signals.flow_finished.connect(flow_finished)
