@@ -13,7 +13,6 @@ from . import models, serializers
 
 
 log = logging.getLogger(__name__)
-log.info("引入hire.flows.py")
 
 
 
@@ -94,7 +93,6 @@ class HireFlow(flows.Flow):
     end = nodes.End()
 
 
-log.info("引入hire.flows.py结束")
 log.info(HireFlow._meta.nodes())
 
 

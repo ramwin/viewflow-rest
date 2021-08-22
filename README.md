@@ -1,6 +1,5 @@
 # viewflow-rest
 
-![](./招聘流程.jpg)  
 
 provide restful viewflow 
 
@@ -10,6 +9,12 @@ Thanks you for all the [contributors of viewflow](https://github.com/viewflow/vi
 
 **The project is under GPL-3.0 License, any one who change the source code (even if you just use it in intranet of just at home) should upload his code**
 
+# Example
+[hr_system/hire/flows.py](./hr_system/hire/flow.py)
+* 中文版  
+![](./hr_system/招聘流程.jpg)
+* English  
+![](./hr_system/flow.jpg)
 
 # Quick Start
 use the `hr_system` as a example
