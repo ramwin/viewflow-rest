@@ -47,8 +47,13 @@ class FlowMeta(object):
 
 class FlowMetaClass(type):
 
-    def __new__(cls, class_name, bases, attrs, **kwargs): 
-        log.debug("创建一个新的Flow类")
+    """
+    the FlowMetaClass can generate the node relations according to the attrs of
+    a Flow Class
+    """
+
+    def __new__(cls, class_name, bases, attrs, **kwargs):
+        log.debug("creating a new Flow class")
         log.debug(attrs)
         new_class = super(FlowMetaClass, cls).__new__(
             cls, class_name, bases, attrs)
@@ -90,10 +95,12 @@ class FlowMetaClass(type):
         for name, node in nodes.items():
             node.ready()
 
+        process_class = attrs.get("process_class", None)
+        if process_class:
+            if not hasattr(process_class, "registered_flows"):
+                setattr(process_class, "registered_flows", set())
+            process_class.registered_flows.add(new_class)
         return new_class
-
-
-log.debug("初始化Flow")
 
 
 class Flow(metaclass=FlowMetaClass):
@@ -115,9 +122,6 @@ class Flow(metaclass=FlowMetaClass):
 
     def __str__(self):
         return str(self.process_title)
-
-
-log.debug("引入viewflow_rest.flows.py结束")
 
 
 this = This()
