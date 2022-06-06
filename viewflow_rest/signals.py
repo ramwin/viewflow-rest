@@ -6,8 +6,8 @@
 from django.dispatch import Signal
 
 
-flow_started = Signal(providing_args=["process", "task"])
-flow_finished = Signal(providing_args=["process", "task"])
+flow_started = Signal()
+flow_finished = Signal()
 
-task_started = Signal(providing_args=["process", "task"])
-task_finished = Signal(providing_args=["process", "task"])
+task_started = Signal()
+task_finished = Signal()
