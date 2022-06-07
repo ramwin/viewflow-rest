@@ -7,10 +7,87 @@ many of code in the project looks like django-viewflow. I want to keep the inter
 
 Thanks you for all the [contributors of viewflow](https://github.com/viewflow/viewflow/graphs/contributors).
 
-**The project is under GPL-3.0 License, any one who change the source code (even if you just use it in intranet of just at home) should upload his code**
+**The project is under `ONLY USER NO PRIVATE CHANGE LICENSE`, any one who change the source code (even if you just use it in intranet of just at home) should publish his code to public**
 
 # Example
-[hr_system/hire/flows.py](./hr_system/hire/flow.py)
+[source code](./hr_system/hire/flow.py)
+```
+class HireFlow(flows.Flow):
+
+    process_class = models.HireProcess
+    task_class = models.HireTask
+
+    start = nodes.Start(
+        viewclass=rest_extensions.AutoCreateAPIView,
+        serializer_class=serializers.AddCandidateSerializer,
+    ).Permission(
+        group=Group.objects.get_or_create(name="hr")[0]
+    ).Next(
+        this.split_to_3rd_and_direct_leader
+    )
+
+    split_to_3rd_and_direct_leader = nodes.Split(
+    ).Always(
+        this.approve
+    ).Always(
+        this.background_research
+    )
+
+    background_research = nodes.View(
+        viewclass=rest_extensions.AutoUpdateAPIView,
+        fields=["background_ok"],
+    ).Next(
+        this.check_background
+    )
+
+    check_background = nodes.If(
+        cond=lambda activation: activation.process.background_ok
+    ).Then(
+        this.join_on_both_approve
+    ).Else(
+        this.end
+            )
+
+    join_on_both_approve = nodes.Join().Next(
+        this.notify
+    )
+
+    notify = nodes.View(
+        viewclass=rest_extensions.AutoUpdateAPIView,
+        fields=["notified"],
+    ).Next(
+        this.end
+    )
+
+    approve = nodes.View(
+        viewclass=rest_extensions.AutoUpdateAPIView,
+        serializer_class = serializers.ApproveSerializer,
+        # fields=["approved"],
+    ).Permission(
+        group=Group.objects.get_or_create(name="leader")[0]
+    ).Next(
+        this.check_if_approve
+    )
+
+    check_if_approve = nodes.If(
+        cond=lambda activation: activation.process.approved
+    ).Then(
+        this.set_salary
+    ).Else(
+        this.notify
+    )
+
+    set_salary = nodes.View(
+        viewclass=rest_extensions.AutoUpdateAPIView,
+        fields=["salary"],
+    ).Permission(
+        group=Group.objects.get_or_create(name="hr")[0]
+    ).Next(
+        this.join_on_both_approve
+    )
+
+    end = nodes.End()
+```
 * 中文版  
 ![](./hr_system/招聘流程.jpg)
 * English  
@@ -20,16 +97,18 @@ Thanks you for all the [contributors of viewflow](https://github.com/viewflow/vi
 use the `hr_system` as a example
 
 
-    git clone git@github.com:ramwin/viewflow-rest.git
-    cd vieflow-rest/hr_system/
-    sudo pip3 install -r ./requirements.txt
-    # add '#' in the file hr_system/urls.py
-    # so that you can run migrate
-    # # path("hire/", include("hire.urls")),
-    python3 manage.py migrate
-    # delete the # in the file hr_system/urls.py
-    python3 manage.py migrate
-    python3 manage.py runserver
+```
+git clone git@github.com:ramwin/viewflow-rest.git
+cd vieflow-rest/hr_system/
+sudo pip3 install -r ./requirements.txt
+# add '#' in the file hr_system/urls.py
+# so that you can run migrate
+# # path("hire/", include("hire.urls")),
+python3 manage.py migrate
+# delete the # in the file hr_system/urls.py
+python3 manage.py migrate
+python3 manage.py runserver
+```
 
 
 # The develop vedio can been seen here
