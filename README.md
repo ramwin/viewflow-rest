@@ -111,6 +111,16 @@ python3 manage.py runserver
 ```
 
 
+# FAQ
+* How To Update the Task manually
+```
+task = models.FlowTaskModel.objects.get(id=4)
+activation = task.activation_class()
+activation.initialize(task.get_flow_task(), task)
+activation.done(operator=User)  # or operator=None
+```
+
+
 # The develop vedio can been seen here
 1. [create project](https://www.bilibili.com/video/BV1Zi4y157k4)
 2. [create Flow](https://www.bilibili.com/video/BV1Uy4y1B7pR)
