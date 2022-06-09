@@ -10,7 +10,8 @@ Thanks you for all the [contributors of viewflow](https://github.com/viewflow/vi
 **The project is under `ONLY USER NO PRIVATE CHANGE LICENSE`, any one who change the source code (even if you just use it in intranet of just at home) should publish his code to public**
 
 # Example
-[source code](./hr_system/hire/flow.py)
+[source code](./example_project/hire/flow.py)
+
 ```
 class HireFlow(flows.Flow):
 
@@ -88,24 +89,25 @@ class HireFlow(flows.Flow):
 
     end = nodes.End()
 ```
+
 * 中文版  
-![](./hr_system/招聘流程.jpg)
+![](./example_project/招聘流程.jpg)
 * English  
-![](./hr_system/flow.jpg)
+![](./example_project/flow.jpg)
 
 # Quick Start
-use the `hr_system` as a example
+use the `example_project` as a example
 
 
 ```
 git clone git@github.com:ramwin/viewflow-rest.git
-cd vieflow-rest/hr_system/
+cd vieflow-rest/example_project/
 sudo pip3 install -r ./requirements.txt
-# add '#' in the file hr_system/urls.py
+# add '#' in the file example_project/urls.py
 # so that you can run migrate
 # # path("hire/", include("hire.urls")),
 python3 manage.py migrate
-# delete the # in the file hr_system/urls.py
+# delete the # in the file example_project/urls.py
 python3 manage.py migrate
 python3 manage.py runserver
 ```

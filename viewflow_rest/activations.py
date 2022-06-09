@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 # Xiang Wang @ 2020-11-06 00:01:40
 
+from django.db import transaction
 from django.utils.timezone import now
 from .edges import STATUS_CHOICE
 from . import signals
@@ -9,6 +10,33 @@ import logging
 
 
 log = logging.getLogger(__name__)
+
+
+def get_or_create_task(task_class, previous, **kwargs):
+    """
+    Create the next task with transaction
+
+    Args:
+        task_class: your defined TaskModel class
+        previous: in order to handle circle flow
+        **kwargs: other parameters used to select the distinct parameter
+
+    Returns:
+        a task_model instance
+    """
+    previous = kwargs.pop("previous")
+    with transaction.atomic():
+        try:
+            task_obj = task_class._default_manager.get(
+                previous=previous,
+                **kwargs
+            )
+        except task_class.DoesNotExist:
+            task_obj = task_class._default_manager.create(
+                **kwargs
+            )
+            task_obj.previous.add(previous)
+    return task_obj
 
 
 class Activation(object):
@@ -107,7 +135,9 @@ class EndActivation(Activation):
     def activate(cls, flow_task, prev_activation):
         flow_class, flow_task = flow_task.flow_class, flow_task
         process = prev_activation.process
-        task, _ = flow_class.task_class.objects.get_or_create(
+        task = get_or_create_task(
+            flow_class.task_class,
+            previous=prev_activation.task,
             process=process,
             flow_task=flow_task.name,
         )
@@ -125,10 +155,13 @@ class ViewActivation(Activation):
 
     @classmethod
     def create_task(cls, flow_task, prev_activation):
-        task = flow_task.flow_class.task_class.objects.get_or_create(
+        task = get_or_create_task(
+            flow_class.task_class,
             process=prev_activation.process,
             flow_task=flow_task.name,
-        )[0]
+            previous=prev_activation.task,
+        )
+
         task.flow_task_type = flow_task.task_type
         task.save()
         return task
@@ -216,10 +249,12 @@ class IfActivation(Activation):
 
     @classmethod
     def create_task(cls, flow_task, prev_activation):
-        task = flow_task.flow_class.task_class.objects.get_or_create(
+        task = get_or_create_task(
+            flow_task.flow_class.task_class,
             process=prev_activation.process,
             flow_task=flow_task.name,
-        )[0]
+            previous=prev_activation.task
+        )
         task.flow_task_type = flow_task.task_type
         task.save()
         return task
@@ -236,10 +271,12 @@ class SplitActivation(Activation):
         flow_class, flow_task = flow_task.flow_class, flow_task
         process = prev_activation.process
 
-        task = flow_class.task_class.objects.get_or_create(
+        task = get_or_create_task(
+            flow_class.task_class,
             process=process,
+            previous=prev_activation.task,
             flow_task=flow_task.name,
-        )[0]
+        )
         task.flow_task_type = flow_task.task_type
         task.start_datetime = now()
         task.save()
@@ -294,6 +331,7 @@ class JoinActivation(Activation):
         task = tasks.first()
         if not task:
             task_exist = False
+            # TODO currently, Join Node didn't support circuit
             task, _ = flow_class.task_class.objects.get_or_create(
                 process=process,
                 flow_task=flow_task.name,
@@ -333,7 +371,9 @@ class JoinActivation(Activation):
         self.task.finish_datetime = now()
         self.task.status = STATUS_CHOICE.DONE
         self.task.save()
-        signals.task_finished.send(sender=self.flow_class, process=self.process, task=self.task)
+        signals.task_finished.send(
+            sender=self.flow_class,
+            process=self.process, task=self.task)
         self.activate_next()
 
     def activate_next(self):
