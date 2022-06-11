@@ -10,6 +10,48 @@ Thanks you for all the [contributors of viewflow](https://github.com/viewflow/vi
 **The project is under `ONLY USER NO PRIVATE CHANGE LICENSE`, any one who change the source code (even if you just use it in intranet of just at home) should publish his code to public**
 
 # Example
+the flow graph can been cloned the changed from [this link](https://www.processon.com/view/link/5fa6007f1e0853701cd57cbc).  
+
+## exam flow
+![exam flow graph](./example_project/exam_flow.png)
+
+this graph like above picture can be written like the below code:  
+
+```
+# example_project/exam/flows.py
+class ExamFlow(flows.Flow):
+
+    process_class = models.ExamProcess
+    task_class = models.ExamTask
+
+    register = nodes.Start(
+        viewclass=rest_extensions.AutoCreateAPIView,
+        serializer_class=serializers.RegisterExamSerializer,
+    ).Next(
+        this.select_term
+    )
+
+    select_term = nodes.View(
+        viewclass=rest_extensions.AutoUpdateAPIView,
+        fields=["term"],
+    ).Next(this.take_exam)
+
+    take_exam = nodes.View(
+        viewclass=rest_extensions.AutoUpdateAPIView,
+        fields=["grade"],
+    ).Next(this.check_grade)
+
+    check_grade = nodes.If(
+        cond=lambda activation: activation.process.passed
+    ).Then(this.end).Else(this.select_term)
+    end = nodes.End()
+
+```
+
+quite simple and intuitive, right?
+
+
+## hire flow
 [source code](./example_project/hire/flow.py)
 
 ```
