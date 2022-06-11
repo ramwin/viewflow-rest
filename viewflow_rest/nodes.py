@@ -5,11 +5,29 @@
 import logging
 
 from . import edges, activations, mixins
+
+from django.contrib.auth.models import Group
 from django.urls import path, re_path
 from django.views.generic.base import RedirectView
 
 
 log = logging.getLogger(__name__)
+
+
+def check_permission(_owner_group, user) -> bool:
+    """
+    Returns:
+        bool:
+            true: can execute
+            false: can not execute
+    """
+    if not _owner_group:
+        return True
+    if not user:
+        return False
+    if isinstance(_owner_group, str):
+        _owner_group = Group.objects.get(name=_owner_group)
+    return user in _owner_group.user_set.all()
 
 
 class Node(object):
@@ -128,9 +146,7 @@ class Start(mixins.PermissionMixin, NextNodeMixin, Node, ViewArgsMixin):
         return urls
 
     def can_execute(self, user, task=None):
-        if self._owner_group:
-            return user in self._owner_group.user_set.all()
-        return True
+        return check_permission(self._owner_group, user)
 
 
 class End(Node):
@@ -169,9 +185,7 @@ class View(mixins.PermissionMixin, NextNodeMixin, Node, ViewArgsMixin):
         return self._view(**self._view_args)
 
     def can_execute(self, user, task):
-        if self._owner_group:
-            return user in self._owner_group.user_set.all()
-        return True
+        return check_permission(self._owner_group, user)
 
 
 class Split(Node, ViewArgsMixin):

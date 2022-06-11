@@ -5,15 +5,13 @@
 
 import logging
 
-from viewflow_rest import flows, nodes, views, rest_extensions, this
-from django.contrib.auth.models import Group
+from viewflow_rest import flows, nodes, rest_extensions, this
 from viewflow_rest import signals
 
 from . import models, serializers
 
 
 log = logging.getLogger(__name__)
-
 
 
 class HireFlow(flows.Flow):
@@ -25,7 +23,7 @@ class HireFlow(flows.Flow):
         viewclass=rest_extensions.AutoCreateAPIView,
         serializer_class=serializers.AddCandidateSerializer,
     ).Permission(
-        group=Group.objects.get_or_create(name="hr")[0]
+        group="hr",
     ).Next(
         this.split_to_3rd_and_direct_leader
     )
@@ -65,10 +63,10 @@ class HireFlow(flows.Flow):
 
     approve = nodes.View(
         viewclass=rest_extensions.AutoUpdateAPIView,
-        serializer_class = serializers.ApproveSerializer,
+        serializer_class=serializers.ApproveSerializer,
         # fields=["approved"],
     ).Permission(
-        group=Group.objects.get_or_create(name="leader")[0]
+        group="leader",
     ).Next(
         this.check_if_approve
     )
@@ -85,7 +83,7 @@ class HireFlow(flows.Flow):
         viewclass=rest_extensions.AutoUpdateAPIView,
         fields=["salary"],
     ).Permission(
-        group=Group.objects.get_or_create(name="hr")[0]
+        group="hr",
     ).Next(
         this.join_on_both_approve
     )
@@ -100,13 +98,16 @@ def task_started(**kwargs):
     log.info("任务开始了")
     log.info(kwargs["task"])
 
+
 def task_finished(**kwargs):
     log.info("任务结束了")
     log.info(kwargs["task"])
 
+
 def flow_started(**kwargs):
     log.info("流程开始了")
     log.info(kwargs)
+
 
 def flow_finished(**kwargs):
     log.info("流程结束了")
