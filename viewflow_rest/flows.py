@@ -30,9 +30,15 @@ class _Resolver(object):
             node = self.nodes.get(link.name)
         elif isinstance(link, str):
             node = self.nodes.get(link)
+        else:
+            raise Exception(f"can not recognize {link}")
         if node:
             return node
-        raise Exception(f"没有node{link}啊")
+        raise Exception((
+            f"no suitable node for {link}, "
+            f"maybe there is a typo in you "
+            f"flow_task: {getattr(link, 'name', 'unknown')}"
+        ))
 
 
 class FlowMeta(object):

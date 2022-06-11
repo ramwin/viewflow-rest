@@ -1,8 +1,5 @@
 from django.db import models
 from viewflow_rest.models import AbstractProcess, AbstractTask
-from rest_framework.generics import RetrieveUpdateAPIView
-
-# Create your models here.
 
 
 class HireProcess(AbstractProcess):

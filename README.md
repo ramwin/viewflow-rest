@@ -138,15 +138,32 @@ activation.done(operator=User)  # or operator=None
     * add `operator` for every task
 
 
-# workflow
-A flow contains many nodes  
-every node is a instance of Node
-every node have a `activation_class`  
+# term
+
+## workflow
+A flow contains many flow\_tasks/nodes  
+```
+# here exam_flow is a workflow
+# it contains three flow_tasks, which were register, do, end
+class ExamFlow(flows.Flow):
+    register = nodes.Start(
+        ...
+    ).Next(this.do)
+    do.nodes.View(
+        ...
+    ).Next(this.end)
+    end = nodes.End()
+exam_flow = ExamFlow()
+```
+every flow\_task is a instance of Node
+every flow\_task have a `activation_class`  
 every `action_class` instance will `activate_next` by
 ```
 self.flow_task._next  // the next node instance
 self.flow_task._next.activate // 
 ```
+
+## flow\_task
 
 ## Edge
 * src: source Node instance
@@ -171,4 +188,3 @@ self.flow_task._next.activate //
 
 
 9. rest_extensions
-

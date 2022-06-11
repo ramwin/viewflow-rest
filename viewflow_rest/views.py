@@ -17,10 +17,16 @@ from . import nodes, edges, activations
 log = logging.getLogger(__name__)
 
 
+def get_user(request):
+    if request.user.is_authenticated:
+        return request.user
+    return None
+
+
 class StartViewMixin(object):
 
     def activation_done(self, *args, **kwargs):
-        self.activation.done(operator=self.request.user)
+        self.activation.done(operator=get_user(self.request))
 
     def perform_create(self, serializer):
         super().perform_create(serializer)
@@ -54,7 +60,7 @@ class StartViewMixin(object):
 class UpdateViewMixin(object):
 
     def activation_done(self, *args, **kwargs):
-        self.activation.done(operator=self.request.user)
+        self.activation.done(operator=get_user(self.request))
 
     def perform_update(self, serializer):
         log.debug("数据更新开始")

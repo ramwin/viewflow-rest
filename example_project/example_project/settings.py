@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'viewflow_rest',
     "rest_framework",
     'hire',
+    'exam',
 ]
 
 MIDDLEWARE = [
@@ -154,7 +155,7 @@ LOGGING = {
   'loggers': {
       '': {
           'handlers': ['file', 'console'],
-          'level': "INFO",
+          'level': "DEBUG",
       },
   },
 }
