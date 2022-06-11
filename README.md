@@ -103,13 +103,9 @@ use the `example_project` as a example
 git clone git@github.com:ramwin/viewflow-rest.git
 cd vieflow-rest/example_project/
 sudo pip3 install -r ./requirements.txt
-# add '#' in the file example_project/urls.py
-# so that you can run migrate
-# # path("hire/", include("hire.urls")),
-python3 manage.py migrate
-# delete the # in the file example_project/urls.py
 python3 manage.py migrate
 python3 manage.py runserver
+# visit http://localhost:8000/exam/ or http://localhost:8000/hire/ to get the api
 ```
 
 
@@ -117,9 +113,7 @@ python3 manage.py runserver
 * How To Update the Task manually
 ```
 task = models.FlowTaskModel.objects.get(id=4)
-activation = task.activation_class()
-activation.initialize(task.get_flow_task(), task)
-activation.done(operator=User)  # or operator=None
+task.auto_finish(operator=User) or operator=None
 ```
 
 

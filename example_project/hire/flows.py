@@ -100,8 +100,7 @@ def task_started(**kwargs):
 
 
 def task_finished(**kwargs):
-    log.info("任务结束了")
-    log.info(kwargs["task"])
+    log.info(f"{kwargs['task']} finished")
 
 
 def flow_started(**kwargs):

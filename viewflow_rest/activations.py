@@ -9,7 +9,7 @@ from . import signals
 import logging
 
 
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 def get_or_create_task(task_class, previous, **kwargs):
@@ -54,7 +54,7 @@ class Activation(object):
         pass
 
     def initialize(self, flow_task, task):
-        log.debug("初始化activation")
+        logger.debug("初始化activation")
         self.flow_task, self.flow_class = flow_task, flow_task.flow_class
         self.process = self.flow_class.process_class._default_manager.get(
             flow_class=".".join([
@@ -99,11 +99,11 @@ class StartActivation(Activation):
         self.task.save()
         signals.task_finished.send(
             sender=self.flow_class, process=self.process, task=self.task)
-        log.debug("StartActivation结束了")
+        logger.debug("StartActivation结束了")
         signals.flow_started.send(
             sender=self.flow_class, process=self.process, task=self.task)
         self.activate_next()
-        log.debug("下一个步骤激活了")
+        logger.debug("下一个步骤激活了")
 
     def activate_next(self):
         if self.flow_task._next:
@@ -116,7 +116,7 @@ class StartActivation(Activation):
 
 class EndActivation(Activation):
 
-    def done(self):
+    def done(self, operator=None):
         signals.task_started.send(
             sender=self.flow_class, process=self.process, task=self.task)
         self.process.status = STATUS_CHOICE.DONE
@@ -132,6 +132,7 @@ class EndActivation(Activation):
 
     @classmethod
     def activate(cls, flow_task, prev_activation):
+        logger.info("the end node is activated")
         flow_class, flow_task = flow_task.flow_class, flow_task
         process = prev_activation.process
         task = get_or_create_task(
@@ -143,10 +144,13 @@ class EndActivation(Activation):
         task.flow_task_type = flow_task.task_type
         task.save()
         task.previous.add(prev_activation.task)
+        task.auto_finish()
 
         activation = cls()
         activation.initialize(flow_task, task)
         activation.done()
+        task.process.status = STATUS_CHOICE.DONE
+        task.process.save()
         return activation
 
 
@@ -189,7 +193,7 @@ class ViewActivation(Activation):
         return activation
 
     def done(self, operator=None):
-        log.debug("ViewActivation结束")
+        logger.debug("ViewActivation结束")
         self.task.finish_datetime = now()
         self.task.status = STATUS_CHOICE.DONE
         self.task.operator = operator
@@ -201,7 +205,7 @@ class ViewActivation(Activation):
         self.activate_next()
 
     def activate_next(self):
-        log.debug("ViewActivation激活下一个")
+        logger.debug("ViewActivation激活下一个")
         if self.flow_task._next:
             self.flow_task._next.activate(
                 prev_activation=self)
