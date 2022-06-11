@@ -7,7 +7,7 @@ many of code in the project looks like django-viewflow. I want to keep the inter
 
 Thanks you for all the [contributors of viewflow](https://github.com/viewflow/viewflow/graphs/contributors).
 
-**The project is under `ONLY USER NO PRIVATE CHANGE LICENSE`, any one who change the source code (even if you just use it in intranet of just at home) should publish his code to public**
+**The project is under `ONLY USE NO PRIVATE CHANGE LICENSE`, any one who change the source code (even if you just use it in intranet of just at home) should publish his code to public**
 
 # Example
 the flow graph can been cloned the changed from [this link](https://www.processon.com/view/link/5fa6007f1e0853701cd57cbc).  
