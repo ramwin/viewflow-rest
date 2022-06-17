@@ -14,7 +14,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 setup(
     name='viewflow-rest',
 
-    version='2.1.0',
+    version='2.2.0',
 
     description="viewlflow that support django rest framework",
     long_description=long_description,
@@ -53,7 +53,7 @@ setup(
 
     packages=["viewflow_rest"],
 
-    install_requires=['django', 'djangorestframework'],
+    install_requires=['django', 'djangorestframework', 'django-status-signal'],
 
     data_files=[('README.md', ['README.md'])],
 )

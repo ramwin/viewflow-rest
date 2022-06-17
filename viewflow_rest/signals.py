@@ -3,7 +3,7 @@
 # Xiang Wang @ 2020-12-13 21:41:22
 
 
-from django.dispatch import Signal
+from django_status_signal import Signal
 
 
 flow_started = Signal()
