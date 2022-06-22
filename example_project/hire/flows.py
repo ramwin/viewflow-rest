@@ -112,7 +112,7 @@ def flow_finished(**kwargs):
     log.info("流程结束了")
 
 
-signals.task_finished.connect(task_finished)
-signals.task_started.connect(task_started)
-signals.flow_started.connect(flow_started)
-signals.flow_finished.connect(flow_finished)
+# signals.task_finished.connect(task_finished)
+# signals.task_started.connect(task_started)
+# signals.flow_started.connect(flow_started)
+# signals.flow_finished.connect(flow_finished)

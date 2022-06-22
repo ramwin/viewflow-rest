@@ -150,6 +150,16 @@ python3 manage.py runserver
 # visit http://localhost:8000/exam/ or http://localhost:8000/hire/ to get the api
 ```
 
+# Change Log
+## 3.0.0 warning: break change abount the signals
+The `post_finish` and `post_start` signal not use the `flow_task` instead of a `flow_process` as a sender. You should change your code from 
+
+    task_started.connect(function, ProcessClass)
+
+to 
+
+    task_started.connect(function, ProcessClass.one_of_its_flow_task)
+
 
 # FAQ
 * How To Update the Task manually

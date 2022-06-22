@@ -91,14 +91,14 @@ class StartActivation(Activation):
     def done(self, operator=None):
         self.process.save()
         signals.task_started.send(
-            sender=self.flow_class, process=self.process, task=self.task)
+            sender=self.flow_task, process=self.process, task=self.task)
         self.task.process = self.process
         self.task.finish_datetime = now()
         self.task.status = STATUS_CHOICE.DONE
         self.task.operator = operator
         self.task.save()
         signals.task_finished.send(
-            sender=self.flow_class, process=self.process, task=self.task)
+            sender=self.flow_task, process=self.process, task=self.task)
         logger.debug("StartActivation结束了")
         signals.flow_started.send(
             sender=self.flow_class, process=self.process, task=self.task)
@@ -118,7 +118,7 @@ class EndActivation(Activation):
 
     def done(self, operator=None):
         signals.task_started.send(
-            sender=self.flow_class, process=self.process, task=self.task)
+            sender=self.flow_task, process=self.process, task=self.task)
         self.process.status = STATUS_CHOICE.DONE
         self.process.finish_datetime = now()
         self.process.save()
@@ -126,7 +126,7 @@ class EndActivation(Activation):
         self.task.status = STATUS_CHOICE.DONE
         self.task.save()
         signals.task_finished.send(
-            sender=self.flow_class, process=self.process, task=self.task)
+            sender=self.flow_task, process=self.process, task=self.task)
         signals.flow_finished.send(
             sender=self.flow_class, process=self.process, task=self.task)
 
@@ -187,7 +187,7 @@ class ViewActivation(Activation):
         activation = cls()
         activation.initialize(flow_task, task)
         signals.task_started.send(
-            sender=activation.flow_class,
+            sender=activation.flow_task,
             process=activation.process, task=activation.task)
 
         return activation
@@ -200,7 +200,7 @@ class ViewActivation(Activation):
         self.task.save()
 
         signals.task_finished.send(
-            sender=self.flow_class, process=self.process, task=self.task)
+            sender=self.flow_task, process=self.process, task=self.task)
 
         self.activate_next()
 
@@ -233,7 +233,7 @@ class IfActivation(Activation):
         self.task.save()
 
         signals.task_started.send(
-            sender=self.flow_class,
+            sender=self.flow_task,
             process=self.process, task=self.task)
 
         self.calculate_next()
@@ -242,7 +242,7 @@ class IfActivation(Activation):
         self.task.status = STATUS_CHOICE.DONE
         self.task.save()
         signals.task_finished.send(
-            sender=self.flow_class,
+            sender=self.flow_task,
             process=self.process, task=self.task)
         self.activate_next()
 
@@ -300,14 +300,14 @@ class SplitActivation(Activation):
 
     def perform(self):
         signals.task_started.send(
-            sender=self.flow_class,
+            sender=self.flow_task,
             process=self.process, task=self.task)
         self.calculate_next()
         self.task.finish_datetime = now()
         self.task.status = STATUS_CHOICE.DONE
         self.task.save()
         signals.task_finished.send(
-            sender=self.flow_class,
+            sender=self.flow_task,
             process=self.process, task=self.task)
         self.activate_next()
 
@@ -364,7 +364,7 @@ class JoinActivation(Activation):
         activation.initialize(flow_task, task)
         if task_exist is False:
             signals.task_started.send(
-                sender=activation.flow_class,
+                sender=activation.flow_task,
                 process=activation.process,
                 task=activation.task)
 
@@ -390,7 +390,7 @@ class JoinActivation(Activation):
         self.task.status = STATUS_CHOICE.DONE
         self.task.save()
         signals.task_finished.send(
-            sender=self.flow_class,
+            sender=self.flow_task,
             process=self.process, task=self.task)
         self.activate_next()
 

@@ -47,5 +47,5 @@ exam_flow = ExamFlow()
 
 task_finished.connect(
     models.ExamProcess.update_pass,
-    sender=ExamFlow,
+    sender=ExamFlow.take_exam,
 )

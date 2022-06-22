@@ -1,9 +1,13 @@
 import logging
+import warnings
 
 from viewflow_rest import flows, nodes, rest_extensions, this
-from viewflow_rest.signals import task_finished
+from viewflow_rest.signals import task_finished, task_started
 
 from . import models, serializers
+
+
+logger = logging.getLogger(__name__)
 
 
 class DeprecatedFlow(flows.Flow):
@@ -15,18 +19,44 @@ class DeprecatedFlow(flows.Flow):
         viewclass=rest_extensions.AutoCreateAPIView,
         serializer_class=serializers.BaseSerializer,
     ).Next(
-        this.should_not_run
+        this.warning
+    )
+    warning = nodes.View(
+        viewclass=rest_extensions.AutoCreateAPIView,
+        serializer_class=serializers.BaseSerializer,
+    ).Next(
+        this.error
+    )
+    error = nodes.View(
+        viewclass=rest_extensions.AutoCreateAPIView,
+        serializer_class=serializers.BaseSerializer,
+    ).Next(
+        this.end
     )
 
-    should_not_run = nodes.End()
+    end = nodes.End()
 
 
 deprecated_flow = DeprecatedFlow()
 
 
+def only_warning(**kwargs):
+    warnings.warn("warning: do not continue anymore!!!!!")
+    logger.warning(kwargs)
+
 def always_raise(**kwargs):
+    logger.error("error!!!")
     raise DeprecationWarning()
 
 
 task_finished.connect(always_raise,
-    sender=DeprecatedFlow,)
+    sender=DeprecatedFlow.error)
+
+task_finished.connect(only_warning,
+    sender=DeprecatedFlow.warning)
+
+task_started.connect(only_warning,
+    sender=DeprecatedFlow.warning)
+    
+task_started.connect(only_warning,
+    sender=DeprecatedFlow.error)
