@@ -21,6 +21,7 @@ class ExamProcess(AbstractProcess):
 
     @classmethod
     def update_pass(cls, task, **kwargs):
+        assert isinstance(task, ExamTask)
         logger.info("calling ExamProcess.update_pass")
         if task.flow_task == "take_exam":
             logger.info(f"the student has taken the exam, score is {task.grade}")
@@ -35,6 +36,3 @@ class ExamTask(AbstractTask):
                                 on_delete=models.CASCADE, related_name="tasks")
     grade = models.IntegerField(default=0)
     term = models.DateField(null=True)
-
-
-task_finished.connect(ExamProcess.update_pass)

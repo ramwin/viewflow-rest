@@ -6,6 +6,7 @@
 import logging
 
 from viewflow_rest import flows, nodes, rest_extensions, this
+from viewflow_rest.signals import task_finished
 
 from . import models, serializers
 
@@ -42,3 +43,9 @@ class ExamFlow(flows.Flow):
 
 
 exam_flow = ExamFlow()
+
+
+task_finished.connect(
+    models.ExamProcess.update_pass,
+    sender=ExamFlow,
+)
