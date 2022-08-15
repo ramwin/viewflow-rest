@@ -40,3 +40,4 @@ class STATUS_CHOICE(TextChoices):
     STARTED = "STARTED", "开始了"
     DONE = "DONE", "结束了"
     CANCELED = "CANCELED", "取消了"
+    UNPASS = "UNPASS", "未通过"
