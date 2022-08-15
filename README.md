@@ -132,10 +132,10 @@ class HireFlow(flows.Flow):
     end = nodes.End()
 ```
 
-* 中文版  
-![](./example_project/招聘流程.jpg)
 * English  
 ![](./example_project/flow.jpg)
+* 中文版  
+![](./example_project/招聘流程.jpg)
 
 # Quick Start
 use the `example_project` as a example
@@ -173,6 +173,19 @@ task.auto_finish(operator=User) or operator=None
     * add `serializer_class` parameters for `rest_extentions.views`
     * add `operator` for every task
 
+
+# Contribution Guildline
+1. fork and clone this repository.
+```
+git clone git@github.com:<your_username>/viewflow-rest.git
+```
+2. make your change in your own repository.
+3. make sure you pass the unittest
+```
+cd example_project
+python manage.py test
+```
+4. create a [pull request](https://github.com/ramwin/viewflow-rest/pulls).
 
 # term
 
