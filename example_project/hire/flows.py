@@ -47,19 +47,23 @@ class HireFlow(flows.Flow):
     ).Then(
         this.join_on_both_approve
     ).Else(
-        this.end
-            )
+        # this.end
+        this.background_research
+    )
+
+
 
     join_on_both_approve = nodes.Join().Next(
-        this.notify
-    )
-
-    notify = nodes.View(
-        viewclass=rest_extensions.AutoUpdateAPIView,
-        fields=["notified"],
-    ).Next(
+        # this.notify
         this.end
     )
+
+    # notify = nodes.View(
+    #     viewclass=rest_extensions.AutoUpdateAPIView,
+    #     fields=["notified"],
+    # ).Next(
+    #     this.end
+    # )
 
     approve = nodes.View(
         viewclass=rest_extensions.AutoUpdateAPIView,
@@ -68,25 +72,26 @@ class HireFlow(flows.Flow):
     ).Permission(
         group="leader",
     ).Next(
-        this.check_if_approve
-    )
-
-    check_if_approve = nodes.If(
-        cond=lambda activation: activation.process.approved
-    ).Then(
-        this.set_salary
-    ).Else(
-        this.notify
-    )
-
-    set_salary = nodes.View(
-        viewclass=rest_extensions.AutoUpdateAPIView,
-        fields=["salary"],
-    ).Permission(
-        group="hr",
-    ).Next(
+        # this.check_if_approve
         this.join_on_both_approve
     )
+
+    # check_if_approve = nodes.If(
+    #     cond=lambda activation: activation.process.approved
+    # ).Then(
+    #     this.set_salary
+    # ).Else(
+    #     this.notify
+    # )
+
+    # set_salary = nodes.View(
+    #     viewclass=rest_extensions.AutoUpdateAPIView,
+    #     fields=["salary"],
+    # ).Permission(
+    #     group="hr",
+    # ).Next(
+    #     this.join_on_both_approve
+    # )
 
     end = nodes.End()
 

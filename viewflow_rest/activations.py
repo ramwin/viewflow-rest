@@ -239,7 +239,10 @@ class IfActivation(Activation):
         self.calculate_next()
 
         self.task.finish_datetime = now()
-        self.task.status = STATUS_CHOICE.DONE
+        if self.condition_result:
+            self.task.status = STATUS_CHOICE.DONE
+        else:
+            self.task.status = STATUS_CHOICE.UNPASS
         self.task.save()
         signals.task_finished.send(
             sender=self.flow_task,
@@ -282,7 +285,7 @@ class SplitActivation(Activation):
         process = prev_activation.process
 
         task = get_or_create_task(
-            flow_class.flow_class.task_class,
+            flow_class.task_class,
             process=process,
             previous=prev_activation.task,
             flow_task=flow_task.name,
